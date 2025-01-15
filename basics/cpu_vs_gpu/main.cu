@@ -1,38 +1,77 @@
 #include <cuda_runtime.h>
 #include <stdio.h>
+#include <stdlib.h>
 
-#include "matrix.h"
+float *alloc_matrix_1D(const int n, const int m) {
+  float *matrix = (float *)malloc(sizeof(float) * n * m);
+  return matrix;
+}
 
-__global__ void transpose_matrix_naive_gpu(int n, int m, const float *origin, float *result)
-{
-  int i = blockIdx.y * blockDim.y + threadIdx.y;
-  int j = blockIdx.x * blockDim.x + threadIdx.x;
-
-  if(i < n && j < m)
-  {
-    result[j * m + i] = origin[i * n +j];
+void print_matrix_1D(const int n, const int m, const float *matrix) {
+  for (int i = 0; i < n; ++i) {
+    for (int j = 0; j < m; ++j) {
+      printf("%.2f\t", matrix[i * m + j]);
+    }
+    printf("\n");
   }
 }
 
-void run_transpose_naive_gpu(const int n, const int m, const float *host_origin)
-{
-  float *dev_origin, *dev_result;
-  cudaMalloc(&dev_origin, n * m * sizeof(float));
-  cudaMalloc(&dev_result, n * m * sizeof(float));
+__global__ void transpose_matrix_naive_gpu(const int n, const int m,
+                                           const float *origin, float *result) {
+  const int i = blockIdx.y * blockDim.y + threadIdx.y;
+  const int j = blockIdx.x * blockDim.x + threadIdx.x;
 
-  cudaMemcpy(dev_origin, host_origin, M * N * sizeof(float), cudaMemcpyHostToDevice);
+  if (i < n && j < m) {
+    result[j * n + i] = origin[i * m + j];
+  }
 }
 
-int main(int argc, char **argv)
-{
+float *run_transpose_naive_gpu(const int n, const int m,
+                               const float *host_origin) {
+  float *dev_origin, *dev_result, *host_result;
+  host_result = alloc_matrix_1D(m, n);
+  cudaMalloc(&dev_origin, sizeof(float) * n * m);
+  cudaMalloc(&dev_result, sizeof(float) * m * n);
+
+  cudaMemcpy(dev_origin, host_origin, n * m * sizeof(float),
+             cudaMemcpyHostToDevice);
+
+  dim3 blockSize(16, 16);
+  dim3 gridSize((n + blockSize.x - 1) / blockSize.x,
+                (m + blockSize.y - 1) / blockSize.y);
+
+  transpose_matrix_naive_gpu<<<gridSize, blockSize>>>(n, m, dev_origin,
+                                                      dev_result);
+  cudaDeviceSynchronize();
+  cudaMemcpy(host_result, dev_result, m * n * sizeof(float),
+             cudaMemcpyDeviceToHost);
+  cudaFree(dev_origin);
+  cudaFree(dev_result);
+  return host_result;
+}
+
+void init_matrix_1D(const int n, const int m, const int base, float *matrix) {
+  for (int i = 0; i < n; ++i) {
+    for (int j = 0; j < m; ++j) {
+      matrix[i * m + j] = base * i * j + i + 2 * j;
+    }
+  }
+}
+
+void free_matrix_1D(float *matrix) { free(matrix); }
+
+int main(int argc, char **argv) {
   printf("Hello, world!\n");
   int n = atol(argv[1]);
   int m = atol(argv[2]);
-  float **matA = alloc_matrix(n, m);
-  float **matB = alloc_matrix(m, n);
-  init_matrix(n, m, 2, matA);
-  //transpose_matrix_block(n, m, matA, matB);
-  free_matrix(n, m, matA);
-  free_matrix(m, n, matB);
+  float *matA = alloc_matrix_1D(n, m);
+  float *matB;
+  init_matrix_1D(n, m, 2, matA);
+  print_matrix_1D(n, m, matA);
+  printf("*****\n");
+  matB = run_transpose_naive_gpu(n, m, matA);
+  print_matrix_1D(m, n, matB);
+  free_matrix_1D(matA);
+  free_matrix_1D(matB);
   return 0;
 }
