@@ -16,17 +16,25 @@ void print_matrix_1D(const int n, const int m, const float *matrix) {
   }
 }
 
-__global__ void transpose_matrix_naive_gpu(const int n, const int m,
+__global__ void transpose_matrix_coalesced(const int n, const int m,
                                            const float *origin, float *result) {
-  const int i = blockIdx.y * blockDim.y + threadIdx.y;
-  const int j = blockIdx.x * blockDim.x + threadIdx.x;
+
+  __shared__ float tile[16][16 + 1];
+  const int i = blockIdx.y * 16 + threadIdx.y;
+  const int j = blockIdx.x * 16 + threadIdx.x;
 
   if (i < n && j < m) {
-    result[j * n + i] = origin[i * m + j];
+    tile[threadIdx.y][threadIdx.x] = origin[j * m + i];
+  }
+
+  __syncthreads();
+
+  if (i < n && j < m) {
+    result[j * n + i] = tile[threadIdx.x][threadIdx.y];
   }
 }
 
-float *run_transpose_naive_gpu(const int n, const int m,
+float *run_transpose_coalesced(const int n, const int m,
                                const float *host_origin) {
   float *dev_origin, *dev_result, *host_result;
   host_result = alloc_matrix_1D(m, n);
@@ -40,7 +48,7 @@ float *run_transpose_naive_gpu(const int n, const int m,
   dim3 gridSize((n + blockSize.x - 1) / blockSize.x,
                 (m + blockSize.y - 1) / blockSize.y);
 
-  transpose_matrix_naive_gpu<<<gridSize, blockSize>>>(n, m, dev_origin,
+  transpose_matrix_coalesced<<<gridSize, blockSize>>>(n, m, dev_origin,
                                                       dev_result);
   cudaDeviceSynchronize();
   cudaMemcpy(host_result, dev_result, m * n * sizeof(float),
@@ -67,7 +75,7 @@ int main(int argc, char **argv) {
   float *matA = alloc_matrix_1D(n, m);
   float *matB;
   init_matrix_1D(n, m, 2, matA);
-  matB = run_transpose_naive_gpu(n, m, matA);
+  matB = run_transpose_coalesced(n, m, matA);
   free_matrix_1D(matA);
   free_matrix_1D(matB);
   return 0;
