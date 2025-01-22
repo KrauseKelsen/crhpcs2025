@@ -1,3 +1,7 @@
 build/
 *swp
 .cache
+*.vts*
+*.pvts*
+*.pvtu*
+*.vtu*

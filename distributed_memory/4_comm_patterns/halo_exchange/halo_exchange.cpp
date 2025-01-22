@@ -4,7 +4,13 @@
 #include "write_halo.h"
 
 int main(int argc, char *argv[]) {
+    // Initialize MPI communicator
     MPI_Init(&argc, &argv);
+
+    // Initialize VTK MPI handler
+    vtkNew<vtkMPIController> mpicontr;
+    mpicontr->Initialize(&argc, &argv, 1); 
+    // 
 
     int rank, size;
     MPI_Comm_rank(MPI_COMM_WORLD, &rank);
@@ -15,36 +21,53 @@ int main(int argc, char *argv[]) {
     int periods[3] = {1, 1, 1}; // Non-periodic boundaries
     int coords[3];              // Rank's coordinates in the grid
     
+    // Define cartesian communicator for cartesian topology
     MPI_Comm cart_comm;
 
     // Create Cartesian communicator
     MPI_Cart_create(MPI_COMM_WORLD, 3, dims, periods, 0, &cart_comm);
     MPI_Cart_coords(cart_comm, rank, 3, coords);
-
     // Neighbors in each direction
+
     int nbr_left, nbr_right, nbr_up, nbr_down, nbr_front, nbr_back;
     MPI_Cart_shift(cart_comm, 0, 1, &nbr_left, &nbr_right);  // x-direction
     MPI_Cart_shift(cart_comm, 1, 1, &nbr_down, &nbr_up);     // y-direction
     MPI_Cart_shift(cart_comm, 2, 1, &nbr_back, &nbr_front);  // z-direction
 
-    std::cout << "Here" << std::endl;
+    const int N = 4;                        // Local size of the grid in each dimension
 
+    // Calculate local extents
+    //int N {10}, N{10}, N{10};        //local dimensions of the process's grid
+    int physdims[3] = {N+1, N+1, N+1};
+    int global_extent[6] = {0, dims[0]*N, 
+                            0, dims[1]*N,
+                            0, dims[2]*N};
+
+    int local_extent[6] = {coords[0]*N, (coords[0]+1)*N,
+                           coords[1]*N, (coords[1]+1)*N,
+                           coords[2]*N, (coords[2]+1)*N};
+
+    
 
     // Local 3D grid for each process
-    const int N = 4;                        // Local size of the grid in each dimension
-    int *grid = new int[N * N * N];         // Allocate 3D grid dynamically
+    int *grid = new int[N * N * N];         // Allocate 3D grid dynamicalN
+    int *grid_x = new int[N * N * N];       // Allocate 3D grid for exchange
+    int *grid_y = new int[N * N * N];       // Allocate 3D grid for exchange
+    int *grid_z = new int[N * N * N];       // Allocate 3D grid for exchange
+
 
     for (int i = 0; i < N * N * N; ++i) {
         grid[i] = rank;                     // Initialize local grid with the rank
+        grid_x[i] = rank;                     // Initialize local grid with the rank
+        grid_y[i] = rank;                     // Initialize local grid with the rank
+        grid_z[i] = rank;                     // Initialize local grid with the rank
     }
 
-    std::ostringstream filename;
-    filename << "output_rank_before_" << rank << ".vtk";
+    std::ostringstream filename_1;
+    filename_1 << "output_rank_1";
     
-    // Determine process coordinates 
-    int phys_coords[3] = {rank % 2, (rank / 2) % 2, rank / 4};
-
-    //write_vtk(filename.str(), grid, N, rank, phys_coords);
+    write_vtk(filename_1.str(), grid, N, rank, size, 
+      coords, local_extent, global_extent, physdims, mpicontr);
 
     // Buffers for halo exchange
     int *send_x = new int[N * N];
@@ -55,13 +78,21 @@ int main(int argc, char *argv[]) {
     int *recv_z = new int[N * N];
 
     // Prepare send buffers (example: sending first layer of each dimension)
-    for (int i = 0; i < N * N; ++i) {
-        send_x[i] = grid[i];          // First layer in x-direction
-        send_y[i] = grid[i * N];      // First layer in y-direction
-        send_z[i] = grid[i * N * N];  // First layer in z-direction
+
+
+    for (int i = 0; i < N; i++)
+    {
+      for (int j = 0; j < N; j++)
+      {
+        send_x[j*N+i] = grid[j*N*N + i*N];
+        send_y[j*N+i] = grid[j*N*N+i];   
+        send_z[j*N+i] = grid[j*N+i];   
+
+      }
     }
 
-    // Exchange in x-direction
+ 
+     // Exchange in x-direction
     MPI_Sendrecv(send_x, N * N, MPI_INT, nbr_left, 0,
                  recv_x, N * N, MPI_INT, nbr_right, 0,
                  cart_comm, MPI_STATUS_IGNORE);
@@ -76,11 +107,44 @@ int main(int argc, char *argv[]) {
                  recv_z, N * N, MPI_INT, nbr_front, 2,
                  cart_comm, MPI_STATUS_IGNORE);
 
-    // Print results
+    // Overwrite received data
+    for (int i = 0; i < N; i++)
+    {
+      for (int j = 0; j < N; j++)
+      {
+        grid_x[j*N*N + i*N + (N-1)] = recv_x[j*N+i];
+        grid_y[j*N*N + (N-1)*N + i] = recv_y[j*N+i];   
+        grid_z[(N-1)*N*N + j*N + i] = recv_z[j*N+i];
+      }
+    }
+
     std::cout << "Rank " << rank << " completed exchanges." << std::endl;
 
-    // Clean up dynamically allocated memory
+    // Print results
+
+    std::ostringstream filename_2_x;
+    filename_2_x << "output_rank_2_x";
+    
+    std::ostringstream filename_2_y;
+    filename_2_y << "output_rank_2_y";
+    
+    std::ostringstream filename_2_z;
+    filename_2_z << "output_rank_2_z";
+
+    write_vtk(filename_2_x.str(), grid_x, N, rank, size, 
+      coords, local_extent, global_extent, physdims, mpicontr);
+
+    write_vtk(filename_2_y.str(), grid_y, N, rank, size, 
+      coords, local_extent, global_extent, physdims, mpicontr);
+    
+    write_vtk(filename_2_z.str(), grid_z, N, rank, size, 
+      coords, local_extent, global_extent, physdims, mpicontr);
+
+    // Clean up dynamicalN allocated memory
     delete[] grid;
+    delete[] grid_x;
+    delete[] grid_y;
+    delete[] grid_z;
     delete[] send_x;
     delete[] recv_x;
     delete[] send_y;
@@ -88,6 +152,10 @@ int main(int argc, char *argv[]) {
     delete[] send_z;
     delete[] recv_z;
 
+    // Finalize VTK processes
+    mpicontr->Finalize(1);
+
+    // Finalize MPI processes
     MPI_Finalize();
     return 0;
 }
