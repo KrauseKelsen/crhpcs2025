@@ -3,18 +3,16 @@
 
 #include "matrix.h"
 
-void transpose_matrix_naive(const int n, const int m, const float **origin, float **result)
-{
-  for(int i = 0; i < n; ++i){
-    for(int j = 0; j < m; ++j)
-    {
+void transpose_matrix_naive(const int n, const int m, float **origin,
+                            float **result) {
+  for (int i = 0; i < n; ++i) {
+    for (int j = 0; j < m; ++j) {
       result[j][i] = origin[i][j];
     }
   }
 }
 
-int main(int argc, char ** argv)
-{
+int main(int argc, char **argv) {
   printf("Hello, world!\n");
   int n = atol(argv[1]);
   int m = atol(argv[2]);

@@ -3,14 +3,12 @@
 
 #include "matrix.h"
 
-void transpose_matrix_block(const int n, const int m, const float **origin, float **result)
-{
-  for(int i = 0; i < n; i += BLOCK_SIZE)
-  {
-    for(int j = 0; j < n; j += BLOCK_SIZE)
-    {
-      for(int ii = i; ii < i + BLOCK_SIZE && ii < n; ++ii){
-        for(int jj = j; jj < j + BLOCK_SIZE && jj < m; ++jj){
+void transpose_matrix_block(const int n, const int m, float **origin,
+                            float **result) {
+  for (int i = 0; i < n; i += BLOCK_SIZE) {
+    for (int j = 0; j < n; j += BLOCK_SIZE) {
+      for (int ii = i; ii < i + BLOCK_SIZE && ii < n; ++ii) {
+        for (int jj = j; jj < j + BLOCK_SIZE && jj < m; ++jj) {
           result[jj][ii] = origin[ii][jj];
         }
       }
@@ -18,8 +16,7 @@ void transpose_matrix_block(const int n, const int m, const float **origin, floa
   }
 }
 
-int main(int argc, char ** argv)
-{
+int main(int argc, char **argv) {
   printf("Hello, world!\n");
   int n = atol(argv[1]);
   int m = atol(argv[2]);
