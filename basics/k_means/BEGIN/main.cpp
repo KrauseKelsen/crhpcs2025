@@ -30,7 +30,7 @@ void write_csv(const std::string &filename_base,
                const std::vector<std::pair<double, double>> points,
                const std::vector<int> &clusters, const int iteration) {
   const std::string filename =
-      filename_base + "_" + std::to_string(iteration) + ".csv";
+      filename_base + std::to_string(iteration) + ".csv";
 
   std::ofstream file(filename);
   if (file.is_open()) {
