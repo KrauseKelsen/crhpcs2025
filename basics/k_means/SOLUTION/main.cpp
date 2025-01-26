@@ -1,9 +1,7 @@
 #include <cmath>
 #include <cstdlib>
-#include <decl/Kokkos_Declare_OPENMP.hpp>
 #include <fstream>
 #include <iostream>
-#include <limits>
 #include <string>
 #include <vector>
 
@@ -13,14 +11,13 @@ std::vector<std::pair<double, double>> read_csv(const std::string &filename) {
   std::vector<std::pair<double, double>> points;
   std::ifstream file(filename);
   std::string line;
-
   while (std::getline(file, line)) {
     double x, y;
     if (sscanf(line.c_str(), "%lf,%lf", &x, &y) == 2) {
       points.emplace_back(x, y);
     }
   }
-
+  file.close();
   return points;
 }
 
@@ -31,17 +28,23 @@ constexpr double distance_squared(const double x1, const double y1,
 }
 
 void write_csv(const std::string &filename_base,
-               const std::vector<std::pair<double, double>> points,
-               const std::vector<int> &clusters, const int iteration) {
+               const Kokkos::View<const double *[2]> &points,
+               const int total_points,
+               const Kokkos::View<const int *> &clusters, const int k,
+               const int iteration) {
   const std::string filename =
-      filename_base + "_" + std::to_string(iteration) + ".csv";
+      filename_base + std::to_string(iteration) + ".csv";
 
   std::ofstream file(filename);
+  auto points_host = Kokkos::create_mirror_view(points);
+  auto clusters_host = Kokkos::create_mirror_view(clusters);
+  Kokkos::deep_copy(points_host, points);
+  Kokkos::deep_copy(clusters_host, clusters);
   if (file.is_open()) {
     file << "x,y,cluster\n";
-    for (int i = 0; i < points.size(); ++i) {
-      file << points[i].first << "," << points[i].second << "," << clusters[i]
-           << "\n";
+    for (int i = 0; i < total_points; ++i) {
+      file << points_host(i, 0) << "," << points_host(i, 1) << ","
+           << clusters_host(i) << "\n";
     }
     file.close();
   } else {
@@ -49,16 +52,17 @@ void write_csv(const std::string &filename_base,
   }
 }
 
-void k_means(const std::vector<std::pair<double, double>> &points, const int k,
-             const int max_iters, Kokkos::View<int *> &clusters) {
-  const size_t num_points = points.size();
+void k_means(const Kokkos::View<const double *[2]> &points,
+             const int num_points, const int k, const int max_iters,
+             Kokkos::View<int *> &clusters) {
 
   Kokkos::View<double *[2]> centroids("centroids", k);
   std::cout << "Initializing centroids...\n";
+  int centr_stride = num_points / k;
   Kokkos::parallel_for(
       "Initialize centroids", k, KOKKOS_LAMBDA(const int centr) {
-        centroids(centr, 0) = points[rand() % num_points].first;
-        centroids(centr, 1) = points[rand() % num_points].first;
+        centroids(centr, 0) = points(centr_stride * centr, 0);
+        centroids(centr, 1) = points(centr_stride * centr, 1);
       });
 
   Kokkos::View<double *[2]> new_centroids("new_centroids", k);
@@ -69,65 +73,50 @@ void k_means(const std::vector<std::pair<double, double>> &points, const int k,
   for (int iter = 0; iter < max_iters; ++iter) {
     Kokkos::parallel_for(
         "Iterate points", num_points, KOKKOS_LAMBDA(const int pt_idx) {
-          double min_distance = std::numeric_limits<double>::max();
+          // double min_distance = std::numeric_limits<double>::max();
+          double min_distance = 1.7e308;
           int best_cluster = 0;
 
           for (int clus = 0; clus < k; ++clus) {
             const double dist =
-                distance_squared(points[pt_idx].first, points[pt_idx].second,
-                                 centroids[clus].first, centroids[clus].second);
+                distance_squared(points(pt_idx, 0), points(pt_idx, 1),
+                                 centroids(clus, 0), centroids(clus, 1));
             if (dist < min_distance) {
               min_distance = dist;
               best_cluster = clus;
             }
           }
-          clusters[pt_idx] = best_cluster;
+          clusters(pt_idx) = best_cluster;
         });
+    Kokkos::parallel_for(
+        "Reset centroids", k, KOKKOS_LAMBDA(const int clus) {
+          new_centroids(clus, 0) = 0.;
+          new_centroids(clus, 1) = 0.;
+          counts(clus) = 0;
+        });
+    Kokkos::parallel_for(
+        "Assign centroids", num_points, KOKKOS_LAMBDA(const int pt_idx) {
+          const int cluster = clusters(pt_idx);
+          Kokkos::atomic_add(&new_centroids(cluster, 0), points(pt_idx, 0));
+          Kokkos::atomic_add(&new_centroids(cluster, 1), points(pt_idx, 1));
+          Kokkos::atomic_add(&counts(cluster), 1);
+        });
+    Kokkos::parallel_for(
+        "Finalize centroids", k, KOKKOS_LAMBDA(const int clus) {
+          if (counts(clus) > 0) {
+            centroids(clus, 0) = new_centroids(clus, 0) / counts(clus);
+            centroids(clus, 1) = new_centroids(clus, 1) / counts(clus);
+          }
+        });
+    write_csv("clusters", points, num_points, clusters, k, iter);
   }
-  //   for (int pt_idx = 0; pt_idx < num_points; ++pt_idx) {
-  //     double min_distance = std::numeric_limits<double>::max();
-  //     int best_cluster = 0;
-  //
-  //     for (int clus = 0; clus < k; ++clus) {
-  //       const double dist =
-  //           distance_squared(points[pt_idx].first, points[pt_idx].second,
-  //                            centroids[clus].first, centroids[clus].second);
-  //       if (dist < min_distance) {
-  //         min_distance = dist;
-  //         best_cluster = clus;
-  //       }
-  //     }
-  //     clusters[pt_idx] = best_cluster;
-  //   }
-  //
-  //   for (int clus = 0; clus < k; ++clus) {
-  //     new_centroids[clus].first = 0.;
-  //     new_centroids[clus].second = 0.;
-  //     counts[clus] = 0;
-  //   }
-  //
-  //   for (int pt_idx = 0; pt_idx < num_points; ++pt_idx) {
-  //     int cluster = clusters[pt_idx];
-  //     new_centroids[cluster].first += points[pt_idx].first;
-  //     new_centroids[cluster].second += points[pt_idx].second;
-  //     counts[cluster] += 1;
-  //   }
-  //
-  //   for (int clus = 0; clus < k; ++clus) {
-  //     if (counts[clus] > 0) {
-  //       centroids[clus].first = new_centroids[clus].first / counts[clus];
-  //       centroids[clus].second = new_centroids[clus].second / counts[clus];
-  //     }
-  //   }
-  //   // std::cout << "Writing file...\n";
-  //   write_csv("clusters", points, clusters, iter);
-  // }
 }
 
 int main(int argc, char **argv) {
   Kokkos::initialize(argc, argv);
   if (argc != 4) {
     std::cerr << "Usage: " << argv[0] << " <input_csv> <k> <max_iterations>\n";
+    Kokkos::finalize();
     exit(EXIT_FAILURE);
   }
   srand(time(NULL));
@@ -138,15 +127,24 @@ int main(int argc, char **argv) {
   const std::string input_csv = argv[1];
   const int k = std::stoi(argv[2]);
   const int max_iters = std::stoi(argv[3]);
-
-  std::cout << "Reading file...\n";
-  auto points = read_csv(input_csv);
-
-  std::cout << "Clustering data, " << points.size() << "...\n";
   {
-    Kokkos::View<int *> clusters("clusters", points.size());
-    // std::vector<int> clusters(points.size());
-    // k_means(points, k, max_iters, clusters);
+    std::cout << "Reading file...\n";
+    auto points = read_csv(input_csv);
+    const int total_points = points.size();
+
+    Kokkos::View<double *[2]> points_view("Points", total_points);
+    auto points_view_host = Kokkos::create_mirror_view(points_view);
+
+    for (int pt_idx = 0; pt_idx < total_points; ++pt_idx) {
+      points_view_host(pt_idx, 0) = points[pt_idx].first;
+      points_view_host(pt_idx, 1) = points[pt_idx].second;
+    }
+
+    Kokkos::deep_copy(points_view, points_view_host);
+
+    std::cout << "Clustering data...\n";
+    Kokkos::View<int *> clusters("clusters", total_points);
+    k_means(points_view, total_points, k, max_iters, clusters);
   }
 
   Kokkos::finalize();

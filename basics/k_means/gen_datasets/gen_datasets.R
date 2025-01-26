@@ -35,8 +35,14 @@ main <- function()
 
   data3 <- generate_gaussian_data(n, center, sigma, 3)
 
+  n <- 5000
+  center <- c(-9, 9)
+  sigma <- matrix(c(1, 0, 0, 1), nrow = 2)
+
+  data4 <- generate_gaussian_data(n, center, sigma, 4)
+
   # Combine both clusters into a single dataset and add dataset identifier
-  data <- bind_rows(data1, data2, data3)
+  data <- bind_rows(data1, data2, data3, data4)
   data$dataset <- "1 - Mixture of Gaussians"
 
   initial_dataset <- data[, c("x", "y")]
