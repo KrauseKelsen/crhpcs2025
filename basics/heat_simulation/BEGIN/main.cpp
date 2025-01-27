@@ -100,18 +100,6 @@ void output_vtk(const Matrix &current, const int step) {
   }
 }
 
-void print_matrix(const Matrix &mat) {
-  const int nx = mat.size();
-  const int ny = mat[0].size();
-
-  for (int i = 0; i < nx; ++i) {
-    for (int j = 0; j < ny; ++j) {
-      std::cout << mat[i][j] << ' ';
-    }
-    std::cout << '\n';
-  }
-}
-
 // Main function to simulate heat distribution over time
 int main(int argc, char **argv) {
   std::cout << "******************\n";
@@ -139,17 +127,13 @@ int main(int argc, char **argv) {
 
   std::cout << "Starting simulation...\n";
   // Perform the heat simulation for the specified number of steps
-  //   auto timer = Kokkos::Timer();
-  //   double total_step_time = 0.;
   std::chrono::duration<double> total_step_time;
   std::chrono::duration<double> total_io_time;
   for (int step = 0; step < steps; ++step) {
     auto start{std::chrono::steady_clock::now()};
-    //     timer.reset();
     diffuse_heat(heat_map, new_heat_map);
     total_step_time += std::chrono::steady_clock::now() - start;
-    //     total_step_time += timer.seconds();
-    //     // Swap the views to use the updated heat distribution in the next
+    //     // Swap the vectors to use the updated heat distribution in the next
     //     // iteration
     std::swap(heat_map, new_heat_map);
     if (step % output_freq == 0) {
@@ -166,7 +150,5 @@ int main(int argc, char **argv) {
   std::cout << "Average step time: " << average_step_time.count() << '\n';
   std::cout << "Total I/O time: " << total_io_time.count() << '\n';
   std::cout << "Average I/O time: " << average_io_time.count() << '\n';
-  // }
-  // Kokkos::finalize();
   return 0;
 }

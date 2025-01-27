@@ -63,40 +63,6 @@ void diffuse_heat(Kokkos::View<const double **> current,
 }
 
 /*
- * @brief This function outputs the current state of the heat distribution to a
- * text file.
- *
- * This function creates a text file named "heat_<step>.txt" where <step> is the
- * current time step number. It writes the temperature values of each grid point
- * in a row-major order. The output is formatted such that each row corresponds
- * to a line in the text file.
- *
- * @param current The current state of the heat distribution.
- * @param nx Number of grid points in x-direction.
- * @param ny Number of grid points in y-direction.
- * @param step Current time step number.
- */
-void output_heat_distribution(const Kokkos::View<const double **> current,
-                              const int nx, const int ny, const int step) {
-  std::ofstream file;
-  std::string filename = "heat_" + std::to_string(step) + ".txt";
-  auto host_current =
-      Kokkos::create_mirror_view_and_copy(Kokkos::HostSpace(), current);
-  file.open(filename);
-  if (file.is_open()) {
-    for (int i = 0; i < nx; ++i) {
-      for (int j = 0; j < ny; ++j) {
-        file << host_current(i, j) << " ";
-      }
-      file << "\n";
-    }
-    file.close();
-  } else {
-    std::cerr << "Unable to open file: " << filename << std::endl;
-  }
-}
-
-/*
  * @brief This function outputs a vtk file for visualization.
  *
  * @param current The current state of the heat distribution.
