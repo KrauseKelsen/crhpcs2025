@@ -36,10 +36,10 @@ void write_csv(const std::string &filename_base,
       filename_base + std::to_string(iteration) + ".csv";
 
   std::ofstream file(filename);
-  auto points_host = Kokkos::create_mirror_view(points);
-  auto clusters_host = Kokkos::create_mirror_view(clusters);
-  Kokkos::deep_copy(points_host, points);
-  Kokkos::deep_copy(clusters_host, clusters);
+  auto points_host =
+      Kokkos::create_mirror_view_and_copy(Kokkos::HostSpace(), points);
+  auto clusters_host =
+      Kokkos::create_mirror_view_and_copy(Kokkos::HostSpace(), clusters);
   if (file.is_open()) {
     file << "x,y,cluster\n";
     for (int i = 0; i < total_points; ++i) {
