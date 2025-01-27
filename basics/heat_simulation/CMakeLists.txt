@@ -1,9 +1,6 @@
 cmake_minimum_required(VERSION 3.12)
 
-project(heat_simulation LANGUAGES CXX)
+project(HeatSim LANGUAGES C CXX CUDA)
 
-find_package(Kokkos REQUIRED)
-
-add_executable(heat_simulation main.cpp)
-
-target_link_libraries(heat_simulation Kokkos::kokkos)
+add_subdirectory(BEGIN)
+add_subdirectory(SOLUTION)

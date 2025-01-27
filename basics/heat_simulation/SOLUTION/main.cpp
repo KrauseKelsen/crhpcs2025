@@ -19,7 +19,7 @@ void initialize_grid(Kokkos::View<double **> grid, const int nx, const int ny) {
       "initialize_grid", nx * ny, KOKKOS_LAMBDA(const int idx) {
         int i = idx / ny;
         int j = idx % ny;
-        if ((i == 0 || i == nx - 1) && (j == 0 || j == ny - 1)) {
+        if ((i == 0 || i == nx - 1) || (j == 0 || j == ny - 1)) {
           grid(i, j) = 100.0; // Boundary condition: set to 100
         } else {
           grid(i, j) = 0.0; // Initial temperature inside the grid is 0
