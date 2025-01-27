@@ -3,6 +3,7 @@
  *        using the Kokkos library.
  */
 
+#include <chrono>
 #include <fstream>
 #include <iostream>
 #include <vector>
@@ -140,28 +141,31 @@ int main(int argc, char **argv) {
   // Perform the heat simulation for the specified number of steps
   //   auto timer = Kokkos::Timer();
   //   double total_step_time = 0.;
-  //   double total_io_time = 0.;
+  std::chrono::duration<double> total_step_time;
+  std::chrono::duration<double> total_io_time;
   for (int step = 0; step < steps; ++step) {
+    auto start{std::chrono::steady_clock::now()};
     //     timer.reset();
     diffuse_heat(heat_map, new_heat_map);
+    total_step_time += std::chrono::steady_clock::now() - start;
     //     total_step_time += timer.seconds();
     //     // Swap the views to use the updated heat distribution in the next
     //     // iteration
     std::swap(heat_map, new_heat_map);
     if (step % output_freq == 0) {
       std::cout << "Writing step " << step << '\n';
-      //       timer.reset();
+      start = std::chrono::steady_clock::now();
       output_vtk(new_heat_map, step);
-      //       total_io_time += timer.seconds();
+      total_io_time += std::chrono::steady_clock::now() - start;
     }
   }
-  //   auto average_step_time = total_step_time / steps;
-  //   auto average_io_time = total_io_time / steps;
+  auto average_step_time = total_step_time / steps;
+  auto average_io_time = total_io_time / steps;
   std::cout << "Simulation complete...\n";
-  //   std::cout << "Total step time: " << total_step_time << '\n';
-  //   std::cout << "Average step time: " << average_step_time << '\n';
-  //   std::cout << "Total I/O time: " << total_io_time << '\n';
-  //   std::cout << "Average I/O time: " << average_io_time << '\n';
+  std::cout << "Total step time: " << total_step_time.count() << '\n';
+  std::cout << "Average step time: " << average_step_time.count() << '\n';
+  std::cout << "Total I/O time: " << total_io_time.count() << '\n';
+  std::cout << "Average I/O time: " << average_io_time.count() << '\n';
   // }
   // Kokkos::finalize();
   return 0;
