@@ -5,3 +5,5 @@ build/
 *.pvts*
 *.pvtu*
 *.vtu*
+*.vtp*
+*.tar.gz*
