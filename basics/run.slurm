@@ -1,16 +1,14 @@
 #!/bin/sh
 
 #SBATCH --job-name=program
-#SBATCH --partition=nukwa-v100
+#SBATCH --partition=nu
 #SBATCH --output=stdout-%x_%j
 #SBATCH --error=stderr-%x_%j
 #SBATCH --time=0-00:20:00
 
 #SBATCH --nodes=1
-#SBATCH --ntasks-per-node=32
 
 module purge
-source /home/casch/.bashrc
 # Load needed modules
 
 module load cuda/12.4.0
