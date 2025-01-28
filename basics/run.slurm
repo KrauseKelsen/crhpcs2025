@@ -16,8 +16,9 @@ fi
 module purge
 # Load needed modules
 if [[ $SLURM_JOB_PARTITION == 'nukwa' || $SLURM_JOB_PARTITION == 'nukwa-v100' || $SLURM_JOB_PARTITION == 'nukwa-debug' ]]; then
-  module load cuda/12.4.0
+  module load cuda/11.1
   module load kokkos/cuda
+  nvidia-smi -L
 else
   module load kokkos/openmp
 fi
