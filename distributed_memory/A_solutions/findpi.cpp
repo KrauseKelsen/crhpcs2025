@@ -1,10 +1,11 @@
 #include "mpi.h"
 #include <math.h>
 
+#define PI25DT 3.141592653589793238462643
+
 int main(int argc, char* argv[])
 {
   int n, rank, size, i;
-  double PI25DT = 3.141592653589793238462643;
   double mypi, pi, h, sum, x;
 
   MPI_Init(&argc,&argv);

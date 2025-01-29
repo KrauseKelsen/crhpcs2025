@@ -44,24 +44,24 @@ For $N = 10^6$ and 4 MPI processes:
 ```Estimated value of pi: 3.14159265 Actual error: 0.00000001 Time taken: 0.05 seconds```
 
 
-# Exercise: Parallel Matrix Multiplication Over Rows Using MPI
+# Exercise: Parallel Matrix - Vector Multiplication Over Rows Using MPI
 
 ## Objective
 
-In this exercise, you will implement matrix multiplication in parallel using MPI. The computation will be distributed across the rows of the first matrix ($A$), with each MPI process computing a subset of the rows in the resulting matrix ($C = A \times B$).
+In this exercise, you will implement matrix -vector multiplication in parallel using MPI. The computation will be distributed across the rows of the first matrix ($A$), with each MPI process computing a subset of the rows in the resulting vector ($\mathbf{A} x = b$).
 
 ---
 
 ## Problem Description
 
-Given two matrices:
-- $A$: An $N \times K$ matrix
-- $B$: A $K \times M$ matrix
+Given:
+- $\mathbf{A}$: An $N \times K$ matrix
+- $x$: A $K \times 1$ vector
 
-The result is matrix $C$, an $N \times M$ matrix, where:
+The result is vector $b$, an $N \times 1$ matrix, where:
 
 $$
-C[i][j] = \sum_{k=0}^{K-1} A[i][k] \times B[k][j]
+b_i = \sum_{k=0}^{K-1} A_{ik}x_k
 $$
 
 ---
@@ -76,15 +76,15 @@ $$
    - Split the rows of matrix $A$ evenly among the $P$ processes. 
    - Each process handles $N / P$ rows (or more, for uneven divisions).
 
-3. **Broadcast Matrix $B$:**
-   - Matrix $B$ is required by all processes for the computation.
-   - Use `MPI_Bcast` to send the complete matrix $B$ to all processes.
+3. **Broadcast Vector $x$:**
+   - Vector $x$ is required by all processes for the computation.
+   - Use `MPI_Bcast` or initialize the same vector on every process to ensure $x$ is in all processes.
 
 4. **Compute Local Contributions:**
-   - Each process calculates the rows of $C$ assigned to it using its subset of rows from $A$ and the entire $B$ matrix.
+   - Each process calculates the rows of $b$ assigned to it using its subset of rows from $A$ and the entire $x$ vector.
 
 5. **Gather Results:**
-   - Use `MPI_Gather` (or `MPI_Gatherv` for uneven distributions) to collect the computed rows of $C$ from all processes on the root process.
+   - Use `MPI_Gather` (or `MPI_Gatherv` for uneven distributions) to collect the computed rows of $b$ from all processes on the root process.
 
 6. **Finalize MPI:**
    - Use `MPI_Finalize` to clean up.
@@ -94,11 +94,11 @@ $$
 ## Implementation Details
 
 - **Input:**
-  - Randomly generate or read matrices $A$ and $B$.
-  - Ensure the dimensions of $A$ and $B$ are compatible for multiplication.
+  - Generate or read matrix $A$ and vector $x$.
+  - Ensure the dimensions of $A$ and $x$ are compatible for multiplication.
 
 - **Output:**
-  - Display or save the resulting matrix $C$ on the root process.
+  - Display or save the resulting vector $b$ on the root process.
   - Print the computation time for performance analysis.
 
 - **Optimization:**
@@ -106,30 +106,6 @@ $$
   - Use collective communication functions where possible.
 
 ---
-
-## Example Output
-
-For $N = 3$, $K = 4$, $M = 3$, and 3 MPI processes:
-
-``` 
-Matrix A: 
-1 2 3 4 
-5 6 7 8 
-9 10 11 12
-
-Matrix B: 
-1 2 3 
-4 5 6 
-7 8 9 
-10 11 12 
-
-Matrix C (Result): 
-C_00 C_01 C_02
-C_10 C_11 C_12
-C_20 C_21 C_22
-
-Time taken: 0.005 seconds
-```
 
 
 # Exercise: Ring Traversal Using MPI

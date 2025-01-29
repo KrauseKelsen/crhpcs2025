@@ -67,6 +67,7 @@ void write_to_vtk(const Kokkos::View<double**>& data, int Nx, int Ny, double dx,
     std::cout << "VTK file written: " << filename.str() << std::endl;
 }
 
+// Add kokkos timer
 
 // Wave equation solver using Kokkos
 void wave_equation_solver() {

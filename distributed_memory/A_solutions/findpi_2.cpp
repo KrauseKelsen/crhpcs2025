@@ -10,15 +10,15 @@ int main(int argc, char** argv) {
     MPI_Comm_rank(MPI_COMM_WORLD, &rank);
     MPI_Comm_size(MPI_COMM_WORLD, &size);
 
-    const long long total_points = 1000000;
-    long long points_per_process = total_points / size;
-    long long local_count = 0;
+    const int total_points = ;
+    int points_per_process = total_points / size;
+    int local_count = 0;
 
     // Seed for random number generation
     srand(rank + 42);
 
     // Monte Carlo simulation
-    for (long long i = 0; i < points_per_process; i++) {
+    for (int i = 0; i < points_per_process; i++) {
         double x = (double)rand() / RAND_MAX * 2.0 - 1.0; // [-1, 1]
         double y = (double)rand() / RAND_MAX * 2.0 - 1.0; // [-1, 1]
         if (x * x + y * y <= 1.0) {
@@ -27,7 +27,7 @@ int main(int argc, char** argv) {
     }
 
     // Reduce to get the total count of points inside the circle
-    long long global_count = 0;
+    int global_count = 0;
     MPI_Reduce(&local_count, &global_count, 1, MPI_LONG_LONG, MPI_SUM, 0, MPI_COMM_WORLD);
 
     if (rank == 0) {

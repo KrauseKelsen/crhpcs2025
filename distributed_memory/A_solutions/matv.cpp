@@ -1,7 +1,7 @@
 #include <mpi.h>
 #include <iostream>
 
-int main(int argv, char *argc[])
+int main(int argc, char *argv[])
 {
     MPI_Init(&argv, &argc);
 

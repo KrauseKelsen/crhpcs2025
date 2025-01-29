@@ -2,10 +2,10 @@
 
 module purge
 
-#module load cuda/12.4.0
+module load cuda/11.8
 module load gcc/11.1.0
 module load cmake/3.26.0
-module load kokkos/openmp
+module load kokkos/cuda
 
 if [ ! -e build/ ]; then
   mkdir build/

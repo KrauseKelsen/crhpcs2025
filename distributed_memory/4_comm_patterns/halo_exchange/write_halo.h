@@ -71,7 +71,6 @@ void write_vtk(const std::string &filename, int *grid, int N, int rank,
     for (vtkIdType i = 0; i < (physdims[0]-1)*(physdims[1]-1)*(physdims[2]-1); ++i) {
         scalarField->SetValue(i,grid[i]); // Assign a unique value per point
     }
-
     
     vtkNew<vtkProgrammableFilter> pf;
     

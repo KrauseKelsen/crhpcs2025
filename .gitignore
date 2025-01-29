@@ -8,3 +8,4 @@ build/
 *.vtu*
 *.vtp*
 *.tar.gz*
+*.vtk*
