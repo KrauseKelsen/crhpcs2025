@@ -13,18 +13,18 @@ CXX=mpic++
 
 $CXX -o deadlock deadlock.cpp
 
-mpirun -np 2 ./deadlock & 
+mpirun -np 2 ./deadlock
 
 # Get the PID of the last background process (MPI process)
-MPI_PID=$!
+#MPI_PID=$!
 
 # Sleep for 5 seconds
-sleep 5
+#sleep 5
 
-echo "5 seconds passed"
+#echo "5 seconds passed"
 
 # Kill the MPI process if it's still running
-kill $MPI_PID
+#kill $MPI_PID
 
 
-rm deadlock
+#rm deadlock

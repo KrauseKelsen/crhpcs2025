@@ -1,5 +1,5 @@
 #!/bin/bash
-#SBATCH --job-name=p2p
+#SBATCH --job-name=collectives
 #SBATCH --partition=nu
 #SBATCH --output=stdout-%x_%j
 #SBATCH --error=stderr-%x_%j
@@ -11,8 +11,8 @@ module load mpich/4.1.1
 
 CXX=mpic++
 
-$CXX -o p2p p2p.cpp
+$CXX -o allgather allgather.cpp
 
-mpiexec -np 2 ./p2p
+mpiexec -np 4 ./allgather
 
-rm p2p
+rm allgather

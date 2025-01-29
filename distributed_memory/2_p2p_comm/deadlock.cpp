@@ -12,10 +12,8 @@ int main(int argc, char *argv[]) {
 
     // Deadlock happens because both processes call MPI_Send first, and wait indefinitely
     if (rank == 0) {
-        MPI_Ssend(&data, 1, MPI_INT, 1, 0, MPI_COMM_WORLD); // Synchronous send to rank 1
         MPI_Recv(&data, 1, MPI_INT, 1, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE); // Receiving from rank 1
     } else if (rank == 1) {
-        MPI_Ssend(&data, 1, MPI_INT, 0, 0, MPI_COMM_WORLD); // Synchronous send to rank 0
         MPI_Recv(&data, 1, MPI_INT, 0, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE); // Receiving from rank 0
     }
 
