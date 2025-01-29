@@ -5,7 +5,9 @@ build/
 *.vts*
 *.pvts*
 *.pvtu*
+*.pvtp*
 *.vtu*
 *.vtp*
 *.tar.gz*
 *.vtk*
+*std*
