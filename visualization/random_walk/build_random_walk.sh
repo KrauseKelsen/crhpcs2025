@@ -1,8 +1,9 @@
 module --force purge
 module load gcc/11.1.0
 module load vtk/9.4.0
+module load cuda/11.8
 module load cmake/3.26.0
-module load kokkos/openmp
+module load kokkos/cuda
 
 cmake -B ./build -S ./ \
     -DCMAKE_CXX_COMPILER=/opt/compilers/gcc-11.1.0/bin/g++ \
