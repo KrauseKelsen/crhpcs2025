@@ -9,8 +9,7 @@
 module --force purge
 module load gcc/11.1.0
 module load mpich/4.1.1
-module load cuda/11.8
 module load cmake/3.26.0
-module load kokkos/cuda
+module load kokkos/openmp
 
 mpiexec -np 2 ./build/p2p
