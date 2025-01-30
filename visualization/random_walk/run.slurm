@@ -15,3 +15,5 @@ module load cmake/3.26.0
 module load kokkos/cuda
 
 ./build/random_walk
+
+tar -czf particles_random_walk.tar.gz *vtp*
