@@ -10,39 +10,6 @@
 #define M 1000
 #define PI 3.141592653589793238462643
 
-/*void calculate_forces(View& particles_i, View& particles_j, int Np) {
-    Kokkos::parallel_for("calculate_forces", mdrange_policy({0,0}, {Np,Np}), KOKKOS_LAMBDA(const int j, const int i) {
-    if (i != j)
-    { 
-      // Calculation with other particles
-      double dx = particles_i(i,1) - particles_j(j,1);
-      double dy = particles_i(i,2) - particles_j(j,2);
-      double dz = particles_i(i,3) - particles_j(j,3);
-      
-      double r = sqrt(dx*dx + dy*dy + dz*dz) + 1e-6;
-
-      double Fmag = G*(particles_i(i,0)*particles_j(j,0))/(r*r);
-
-      Kokkos::atomic_add(&particles_i(i, 7), += -Fmag*dx/r);
-      particles_i(i, 8) += -Fmag*dy/r;
-      particles_i(i, 9) += -Fmag*dz/r;
-
-      // Calculation with central mass
-      dx = particles_i(i,1);
-      dy = particles_i(i,2);   // Central mass is located at (0,0,0)
-      dz = particles_i(i,3);
-
-      r = sqrt(dx*dx + dy*dy + dz*dz) + 1e-6;
-
-      Fmag = G*(M*particles_i(i,0))/(r*r);
-      
-      particles_i(i, 7) += -Fmag*dx/r;
-      particles_i(i, 8) += -Fmag*dy/r;
-      particles_i(i, 9) += -Fmag*dz/r;
-    }
-  });
-}*/
-
 void calculate_forces(View& particles_i, View& particles_j, int Np) {
   using TeamPolicy = Kokkos::TeamPolicy<>;
   using MemberType = TeamPolicy::member_type;

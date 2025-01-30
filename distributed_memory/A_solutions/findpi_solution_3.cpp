@@ -18,13 +18,17 @@ int main(int argc, char* argv[])
   int rect_procs =  N / size;
   int extra_rects = N % size;
 
-  int local_rects = rect_procs + (rank < extra_rects ? 1 : 0);
+  int local_rects = rect_procs;  //  + (rank < extra_rects ? 1 : 0);
+
+  if (rank < extra_rects ){
+    local_rects += 1
+  }
+
   int start = rank * rect_procs + (rank < extra_rects ? rank : extra_rects);
 
   h   = 1.0 / (double) N; // width of subdivision
   sum = 0.0;              // initialize sum to zero
   
-  int ii;
   for (i = start; i <= start+local_rects; i++) {
     x = h * ((double)i - 0.5);  // midpoint calculation
     sum += 4.0 / (1.0 + x*x);

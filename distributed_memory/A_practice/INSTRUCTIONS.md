@@ -73,7 +73,7 @@ $$
    - Determine the total number of MPI processes ($P$).
 
 2. **Divide Rows Among Processes:**
-   - Split the rows of matrix $A$ evenly among the $P$ processes. 
+   - Split the rows of matrix $\mathbf{A}$ evenly among the $P$ processes. 
    - Each process handles $N / P$ rows (or more, for uneven divisions).
 
 3. **Broadcast Vector $x$:**
@@ -81,7 +81,7 @@ $$
    - Use `MPI_Bcast` or initialize the same vector on every process to ensure $x$ is in all processes.
 
 4. **Compute Local Contributions:**
-   - Each process calculates the rows of $b$ assigned to it using its subset of rows from $A$ and the entire $x$ vector.
+   - Each process calculates the rows of $b$ assigned to it using its subset of rows from $\mathbf{A}$ and the entire $x$ vector.
 
 5. **Gather Results:**
    - Use `MPI_Gather` (or `MPI_Gatherv` for uneven distributions) to collect the computed rows of $b$ from all processes on the root process.
@@ -94,8 +94,8 @@ $$
 ## Implementation Details
 
 - **Input:**
-  - Generate or read matrix $A$ and vector $x$.
-  - Ensure the dimensions of $A$ and $x$ are compatible for multiplication.
+  - Generate or read matrix $\mathbf{A}$ and vector $x$.
+  - Ensure the dimensions of $\mathbf{A}$ and $x$ are compatible for multiplication.
 
 - **Output:**
   - Display or save the resulting vector $b$ on the root process.
@@ -104,9 +104,7 @@ $$
 - **Optimization:**
   - Consider minimizing communication overhead by dividing rows more efficiently.
   - Use collective communication functions where possible.
-
 ---
-
 
 # Exercise: Ring Traversal Using MPI
 

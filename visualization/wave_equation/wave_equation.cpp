@@ -102,7 +102,7 @@ void wave_equation_solver() {
             }
         });
 
-         write_to_vtk(u_curr, Nx, Ny, dx, dy, t);
+        write_to_vtk(u_curr, Nx, Ny, dx, dy, t);
         // Swap views for the next iteration
         Kokkos::deep_copy(u_prev, u_curr);
         Kokkos::deep_copy(u_curr, u_next);

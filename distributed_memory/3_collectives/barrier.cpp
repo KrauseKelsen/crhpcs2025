@@ -11,12 +11,11 @@ int main(int argc, char *argv[]) {
 
     if (rank == 0) {
         std::this_thread::sleep_for(std::chrono::seconds(2));
-        std::cout << "Process 0 reached barrier" << std::endl;
     }
     else { 
         std::cout << "Process " << rank << " keeps going" << std::endl;
     }
-
+    std::cout << "Process " << rank << " reached barrier" << std::endl;
     MPI_Barrier(MPI_COMM_WORLD);
 
     std::cout << "Process " << rank << " passed the barrier" << std::endl;

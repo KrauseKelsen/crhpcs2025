@@ -6,7 +6,7 @@
 
 int main(int argc, char* argv[])
 {
-  int n, rank, size, i;
+  int n, rank, size;
   double mypi, pi, h, sum, x;
 
   MPI_Init(&argc,&argv);
@@ -20,11 +20,11 @@ int main(int argc, char* argv[])
 
   h   = 1.0 / (double) n; // width of subdivision
   sum = 0.0;              // initialize sum to zero
-  double start = (n/size) * rank;
-  double stop = (n/size) * (rank + 1);
+  double start = (n/size) * rank; // 0, 1, 2, ... 
+  double stop = (n/size) * (rank + 1); // 1, 2, 3, ... 
   
-  for (i = start; i <= stop; i += 1) {
-    x = h * ((double)i - 0.5);  // midpoint calculation
+  for (int i = start; i <= stop; i += 1) {
+    x = h * ((double) i - 0.5);  // midpoint calculation
     sum += 4.0 / (1.0 + x*x);
   }
 

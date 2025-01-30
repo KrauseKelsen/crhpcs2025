@@ -11,7 +11,19 @@ module load mpich/4.1.1
 
 CXX=mpic++
 
-$CXX -o findpi findpi.cpp
+$CXX -o findpi findpi_solution_1.cpp
+
+mpiexec -np 4 ./findpi 100000
+
+rm findpi
+
+$CXX -o findpi findpi_solution_2.cpp
+
+mpiexec -np 4 ./findpi 100000
+
+rm findpi
+
+$CXX -o findpi findpi_solution_3.cpp
 
 mpiexec -np 4 ./findpi 100000
 

@@ -8,8 +8,6 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 # Find MPI package
 find_package(MPI REQUIRED)
-
-# Find VTK package (adjust version or components as needed)
 find_package(Kokkos REQUIRED)
 
 # Include directories (MPI and VTK)
