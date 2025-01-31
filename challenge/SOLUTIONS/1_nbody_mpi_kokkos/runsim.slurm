@@ -1,12 +1,12 @@
 #!/bin/bash
 
 #SBATCH --job-name=nbody
-#SBATCH --partition=kura-all
+#SBATCH --partition=nu-wide
 #SBATCH --output=%x-stdout_%j
 #SBATCH --error=%x-stderr_%j
 #SBATCH --time=0-00:20:00
 
-#SBATCH --nodes=10
+#SBATCH --nodes=4
 
 if [ $SLURM_JOB_PARTITION == 'kura-all' ]; then
   . /opt/Modules/3.2.10/init/sh
@@ -22,7 +22,7 @@ module load kokkos/openmp
 
 export OMP_PLACES=threads
 export OMP_PROC_BIND=spread
-export KOKKOS_NUM_THREADS=2
+export OMP_NUM_THREADS=128
 
-srun -N 10 ./build/nbody_problem 2500 2000 100 0.001
+srun -N 4 ./build/nbody_problem 1500 15000 100 0.001
 

@@ -43,10 +43,10 @@ void write_to_vtk(const Kokkos::View<double**>& data, int Nx, int Ny, double dx,
     waveAmplitude->SetNumberOfTuples(Nx * Ny);
 
     // Copy the simulation data from Kokkos to the vtkDoubleArray
-    auto data_host = Kokkos::create_mirror_view_and_copy(Kokkos::HostSpace(), data);
+    //auto data_host = Kokkos::create_mirror_view_and_copy(Kokkos::HostSpace(), data);
     for (int i = 0; i < Nx; ++i) {
         for (int j = 0; j < Ny; ++j) {
-            waveAmplitude->SetTuple1(i * Ny + j, data_host(i, j));
+            waveAmplitude->SetTuple1(i * Ny + j, data(i, j));
         }
     }
 

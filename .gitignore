@@ -8,6 +8,6 @@ build/
 *.pvtp*
 *.vtu*
 *.vtp*
-*.tar.gz*
+*particles.tar.gz*
 *.vtk*
 *std*

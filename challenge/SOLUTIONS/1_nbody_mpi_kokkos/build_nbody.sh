@@ -1,6 +1,5 @@
 module --force purge
 module load gcc/11.1.0
-module load cuda/11.8
 module load mpich
 module load vtk/9.4.1-mpi
 module load cmake/3.26.0

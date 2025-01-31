@@ -4,8 +4,8 @@
 #include <vtkNew.h>
 #include <vtkPoints.h>
 #include <vtkPolyData.h>
-#include <vtkCellArray.h>
-#include <vtkPolyLine.h>
+#include <vtkCellArray.h> //
+#include <vtkPolyLine.h> //
 #include <vtkXMLPolyDataWriter.h>
 
 #include <cstdlib>
@@ -39,17 +39,24 @@ int main(int argv, char* argc[]) {
 
       std::cout << "Step: " << i <<  std::endl; 
 
-      if (i % n_write == 0 || i == 0)
+      if (i % n_write == 0)
       {
         // VTK Routines for plotting
         vtkNew<vtkPoints> points;
+
+        /*
+        positions_gpu
+        positions_cpu
+
+        Kokkos::deep_copy(positions_cpu, positions_gpu);
+        */
         
         // Iterate over particles to create VTK structures
-        for (int i = 0; i < numParticles; ++i) {
+        for (int j = 0; j < numParticles; ++j) {
           points->InsertNextPoint(
-              positions(i, 0), 
-              positions(i, 1), 
-              positions(i, 2)
+              positions(j, 0), 
+              positions(j, 1), 
+              positions(j, 2)
           );
         }
         
@@ -67,12 +74,14 @@ int main(int argv, char* argc[]) {
       // Generate random walks for all particles
       Kokkos::parallel_for("random_walk_particles", numParticles, KOKKOS_LAMBDA(const int i) {
         auto generator = random_pool.get_state();
+        
         double theta = PI*generator.drand(0., 1.);
         double phi = 2*PI*generator.drand(0., 1.);
 
         double dx = R*sin(theta)*cos(phi);
         double dy = R*sin(theta)*sin(phi);
         double dz = R*cos(theta);
+
         // do not forget to release the state of the engine
         random_pool.free_state(generator);
 
@@ -81,11 +90,8 @@ int main(int argv, char* argc[]) {
         positions(i, 1) += dy;
         positions(i, 2) += dz;
       });
-
-      
     }
   }
   Kokkos::finalize();
-
   return 0;
 }

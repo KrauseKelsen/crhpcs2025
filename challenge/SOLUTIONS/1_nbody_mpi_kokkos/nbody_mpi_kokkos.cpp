@@ -142,7 +142,7 @@ int main(int argc, char* argv[]){
       particles(i, 3) = z; // z
 
       double eps = generator.drand(-0.01, 0.01);
-      double vt = sqrt(G*M/r)*(1+eps);
+      double vt = 1.5*sqrt(G*M/r)*(1+eps);
 
       // calculate tangential velocity (r_hat x k_hat)
 
