@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.10)
 
-project(findpi)
+project(random_walk)
 
 # Specify C++ standard
 set(CMAKE_CXX_STANDARD 11)
@@ -16,9 +16,9 @@ include_directories(${VTK_INCLUDE_DIRS})
 include_directories(${MPI_INCLUDE_DIRS})
 
 # Add executable
-add_executable(findpi findpi.cpp)
+add_executable(random_walk random_walk.cpp)
 
 # Link MPI libraries
-target_link_libraries(findpi ${VTK_LIBRARIES})
-target_link_libraries(findpi ${MPI_LIBRARIES})
-target_link_libraries(findpi Kokkos::kokkos)
+target_link_libraries(random_walk ${VTK_LIBRARIES})
+target_link_libraries(random_walk ${MPI_LIBRARIES})
+target_link_libraries(random_walk Kokkos::kokkos)

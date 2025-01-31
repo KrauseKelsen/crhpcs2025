@@ -21,8 +21,6 @@ int main(int argv, char* argc[]) {
     const double R = 0.001;         // Step size
     const int n_write = 2;         // write frequency
 
-    // 1. Kokkos View to Store All Particles' Random Walks
-    Kokkos::View<double**, Kokkos::Device<Kokkos::DefaultExecutionSpace,Kokkos::SharedSpace>> positions("positions", numParticles, 3);
 
     // Initialize data structure to hold particles 
     double **particles = new double*[Np]; // each particle x,y,z
