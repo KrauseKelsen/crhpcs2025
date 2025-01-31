@@ -71,7 +71,7 @@ int main(int argv, char* argc[]) {
       }
 
       // Generate random walks for all particles
-      for (int i = 0; i < Np; i++){ 
+      for (int j= 0; j < Np; j++){ 
         double theta = PI*udist(gen);
         double phi = 2*PI*udist(gen);
 
