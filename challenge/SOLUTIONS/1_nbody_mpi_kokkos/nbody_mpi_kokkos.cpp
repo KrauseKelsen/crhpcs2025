@@ -11,13 +11,14 @@
 #define PI 3.141592653589793238462643
 
 void calculate_forces(View& particles_i, View& particles_j, int Np) {
-  using TeamPolicy = Kokkos::TeamPolicy<>;
-  using MemberType = TeamPolicy::member_type;
+  //using TeamPolicy = Kokkos::TeamPolicy<>;
+  //using MemberType = TeamPolicy::member_type;
 
-  TeamPolicy policy(Np, Kokkos::AUTO()); // One team per particle
+  //TeamPolicy policy(Np, Kokkos::AUTO()); // One team per particle
 
-  Kokkos::parallel_for("calculate_forces", policy, KOKKOS_LAMBDA(const MemberType& team) {
-    const int i = team.league_rank(); // Each team handles one particle
+  //Kokkos::parallel_for("calculate_forces", policy, KOKKOS_LAMBDA(const MemberType& team) {
+  //  const int i = team.league_rank(); // Each team handles one particle
+  Kokkos::parallel_for("calculate_forces", Np, KOKKOS_LAMBDA(const int i) {
     double fx = 0.0, fy = 0.0, fz = 0.0;
 
     for (int i = 0; i < Np; i++)
@@ -30,9 +31,9 @@ void calculate_forces(View& particles_i, View& particles_j, int Np) {
         double r = sqrt(dx*dx + dy*dy + dz*dz) + 1e-6;
         double Fmag = G * (particles_i(i,0) * particles_j(j,0)) / (r * r);
 
-        fx_sum += -Fmag * dx / r;
-        fy_sum += -Fmag * dy / r;
-        fz_sum += -Fmag * dz / r;
+        fx += -Fmag * dx / r;
+        fy += -Fmag * dy / r;
+        fz += -Fmag * dz / r;
       }
     }
 
