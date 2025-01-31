@@ -20,6 +20,23 @@ void calculate_forces(View& particles_i, View& particles_j, int Np) {
     const int i = team.league_rank(); // Each team handles one particle
     double fx = 0.0, fy = 0.0, fz = 0.0;
 
+    for (int i = 0; i < Np; i++)
+    {
+      if (i != j) {
+        double dx = particles_i(i,1) - particles_j(j,1);
+        double dy = particles_i(i,2) - particles_j(j,2);
+        double dz = particles_i(i,3) - particles_j(j,3);
+        
+        double r = sqrt(dx*dx + dy*dy + dz*dz) + 1e-6;
+        double Fmag = G * (particles_i(i,0) * particles_j(j,0)) / (r * r);
+
+        fx_sum += -Fmag * dx / r;
+        fy_sum += -Fmag * dy / r;
+        fz_sum += -Fmag * dz / r;
+      }
+    }
+
+    /*
     Kokkos::parallel_reduce(Kokkos::TeamThreadRange(team, Np), [&](const int j, double& fx_sum, double& fy_sum, double& fz_sum) {
       if (i != j) {
         double dx = particles_i(i,1) - particles_j(j,1);
@@ -33,7 +50,7 @@ void calculate_forces(View& particles_i, View& particles_j, int Np) {
         fy_sum += -Fmag * dy / r;
         fz_sum += -Fmag * dz / r;
       }
-    }, fx, fy, fz);
+    }, fx, fy, fz);*/
 
     // Add central mass force
     double dx = particles_i(i,1);
