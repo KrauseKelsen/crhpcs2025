@@ -1,5 +1,4 @@
-#include <Kokkos_Core.hpp>
-#include <Kokkos_Random.hpp>
+#include <random>
 
 #include <vtkNew.h>
 #include <vtkPoints.h>
@@ -16,16 +15,16 @@
 int main(int argv, char* argc[]) {
 
     // Parameters
-    const int numParticles = 1000;   // Number of particles
+    const int Np = 1000;   // Number of particles
     const int numSteps = 1000;       // Steps per particle
     const double R = 0.001;         // Step size
     const int n_write = 2;         // write frequency
 
 
     // Initialize data structure to hold particles 
-    double **particles = new double*[Np]; // each particle x,y,z
+    double **positions = new double*[Np]; // each particle x,y,z
     for (int i = 0; i < Np; i++) {
-        particles[i] = new double[10]; // 11 to store rank
+        positions[i] = new double[3]; // 11 to store rank
     }
 
     // Initialize the starting point for all particles
@@ -52,7 +51,7 @@ int main(int argv, char* argc[]) {
         vtkNew<vtkPoints> points;
 
         // Iterate over particles to create VTK structures
-        for (int j = 0; j < numParticles; ++j) {
+        for (int j = 0; j < Np; ++j) {
           points->InsertNextPoint(
               positions[j][0], 
               positions[j][1], 

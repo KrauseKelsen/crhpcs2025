@@ -16,7 +16,7 @@ include_directories(${VTK_INCLUDE_DIRS})
 include_directories(${MPI_INCLUDE_DIRS})
 
 # Add executable
-add_executable(nbody_problem nbody_mpi_kokkos.cpp)
+add_executable(nbody_problem nbody_serial.cpp)
 
 # Link MPI libraries
 target_link_libraries(nbody_problem ${VTK_LIBRARIES})

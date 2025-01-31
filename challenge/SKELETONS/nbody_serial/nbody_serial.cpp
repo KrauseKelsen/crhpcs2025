@@ -18,47 +18,43 @@ void calculate_forces(double **particles, int Np)
 { 
   for (int i = 0; i < Np; i++)
   {
-    double fx = 0.0, fy = 0.0, fz = 0.0;
-
+    double fx_sum = 0.0, fy_sum = 0.0, fz_sum = 0.0;
     for (int j = 0; j < Np; j++)
     {
-      double dx particles[i][1] - particles[j][1];   
-      double dy particles[i][2] - particles[j][2];   
-      double dz particles[i][3] - particles[j][3];   
+      if (i != j)
+      {
+        double dx = particles[i][1] - particles[j][1];   
+        double dy = particles[i][2] - particles[j][2];   
+        double dz = particles[i][3] - particles[j][3];   
 
-      double r = sqrt(dx*dx + dy*dy + dz*dz) + 1e-6;
-      double Fmag = G * (particles(i,0) * particles(j,0)) / (r * r);
-      
-      fx_sum += -Fmag * dx / r;
-      fy_sum += -Fmag * dy / r;
-      fz_sum += -Fmag * dz / r;
+        double r = sqrt(dx*dx + dy*dy + dz*dz) + 1e-6;
+        double Fmag = G * (particles[i][0] * particles[j][0]) / (r * r);
+
+        fx_sum += -Fmag * dx / r;
+        fy_sum += -Fmag * dy / r;
+        fz_sum += -Fmag * dz / r;
+      }
     }
-    double dx = particles(i,1);
-    double dy = particles(i,2);
-    double dz = particles(i,3);
+    double dx = particles[i][1];
+    double dy = particles[i][2];
+    double dz = particles[i][3];
 
     double r = sqrt(dx*dx + dy*dy + dz*dz) + 1e-6;
-    double Fmag = G * (M * particles(i,0)) / (r * r);
+    double Fmag = G * (M * particles[i][0]) / (r * r);
 
-    fx += -Fmag * dx / r;
-    fy += -Fmag * dy / r;
-    fz += -Fmag * dz / r;
+    fx_sum += -Fmag * dx / r;
+    fy_sum += -Fmag * dy / r;
+    fz_sum += -Fmag * dz / r;
 
-    particles_i[i][7] = fx;
-    particles_i[i][8] = fy;
-    particles_i[i][9] = fz;
+    particles[i][7] = fx_sum;
+    particles[i][8] = fy_sum;
+    particles[i][9] = fz_sum;
   }
 }
 
-void solve()
+void solve(int Np, int Nt, int N_write, double dt)
 {
-  Kokkos::Random_XorShift64_Pool<> random_pool(/*seed=*/12345);
-
-  int Np = atoi(argv[1]);       // Number of particles in simulation
-  int Nt = atoi(argv[2]);       // Number of timesteps for simulation
-  int N_write = atoi(argv[3]);  // Write frequency for output
-  double dt = atof(argv[4]);    // timestep for simulation
-
+  
   // Initialize data structure to hold particles 
   double **particles = new double*[Np]; // each particle (mass,x,y,z,vx,vy,vz,ax,ay,az)
   for (int i = 0; i < Np; i++) {
@@ -77,7 +73,7 @@ void solve()
     double r = 10 + udist(gen)*40;
     double theta = 2*PI*udist(gen);
     double z = 10*udist(gen) - 5;
-
+ 
     particles[i][0] = 0.5 + udist(gen);
 
     particles[i][1] = r*cos(theta); // x
@@ -165,12 +161,16 @@ void solve()
   }
 
   for (int i = 0; i < Np; i++) {
-    delete[] = particles[i];
+    delete[] particles[i];
   }
 
   delete[] particles;
 }
 
 int main(int argc, char* argv[]){
-  solve();
+  int Np = atoi(argv[1]);       // Number of particles in simulation
+  int Nt = atoi(argv[2]);       // Number of timesteps for simulation
+  int N_write = atoi(argv[3]);  // Write frequency for output
+  double dt = atof(argv[4]);    // timestep for simulation
+  solve(Np, Nt, N_write, dt);
 }
