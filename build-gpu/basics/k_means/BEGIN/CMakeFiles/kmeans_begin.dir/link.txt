@@ -1,0 +1,1 @@
+/opt/tools/kokkos-cuda/install/kokkos/bin/kokkos_launch_compiler /opt/tools/kokkos-cuda/install/kokkos/bin/nvcc_wrapper /opt/compilers/gcc-11.1.0/bin/g++ /opt/compilers/gcc-11.1.0/bin/g++ CMakeFiles/kmeans_begin.dir/main.cpp.o -o kmeans_begin 

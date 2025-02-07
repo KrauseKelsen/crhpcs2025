@@ -1,0 +1,25 @@
+-- The C compiler identification is GNU 11.1.0
+-- The CXX compiler identification is GNU 11.1.0
+-- Detecting C compiler ABI info
+-- Detecting C compiler ABI info - done
+-- Check for working C compiler: /opt/compilers/gcc-11.1.0/bin/gcc - skipped
+-- Detecting C compile features
+-- Detecting C compile features - done
+-- Detecting CXX compiler ABI info
+-- Detecting CXX compiler ABI info - done
+-- Check for working CXX compiler: /opt/compilers/gcc-11.1.0/bin/g++ - skipped
+-- Detecting CXX compile features
+-- Detecting CXX compile features - done
+-- Found MPI_C: /opt/tools/mpich-4.1.1/lib/libmpi.so (found version "4.0") 
+-- Found MPI_CXX: /opt/tools/mpich-4.1.1/lib/libmpicxx.so (found version "4.0") 
+-- Found MPI: TRUE (found version "4.0")  
+-- Found OpenMP_CXX: -fopenmp (found version "4.5") 
+-- Found OpenMP: TRUE (found version "4.5") found components: CXX 
+-- Enabled Kokkos devices: OPENMP
+-- Configuring done (67.7s)
+-- Generating done (1.9s)
+-- Build files have been written to: /home/hpc-2839/crhpcs2025/distributed_memory/5_mpi_plus_x/p2p/build
+[ 50%] Building CXX object CMakeFiles/p2p.dir/p2p.cpp.o
+[100%] Linking CXX executable p2p
+[100%] Built target p2p
+-- Install configuration: ""

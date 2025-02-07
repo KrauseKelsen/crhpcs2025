@@ -1,0 +1,1 @@
+/opt/tools/kokkos-cuda/install/kokkos/bin/kokkos_launch_compiler /opt/tools/kokkos-cuda/install/kokkos/bin/nvcc_wrapper /opt/compilers/gcc-11.1.0/bin/g++ /opt/compilers/gcc-11.1.0/bin/gcc CMakeFiles/cpu_version_naive.dir/main_naive.c.o CMakeFiles/cpu_version_naive.dir/matrix.c.o -o cpu_version_naive 

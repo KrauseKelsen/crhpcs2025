@@ -16,7 +16,7 @@ include_directories(${VTK_INCLUDE_DIRS})
 include_directories(${MPI_INCLUDE_DIRS})
 
 # Add executable
-add_executable(random_walk random_walk.cpp)
+add_executable(random_walk random_walk_mpi.cpp)
 
 # Link MPI libraries
 target_link_libraries(random_walk ${VTK_LIBRARIES})
